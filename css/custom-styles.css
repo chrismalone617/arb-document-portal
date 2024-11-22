@@ -1,0 +1,12 @@
+/* Ensure dropdown styles match Gravity Forms styling */
+.select2-container--default .select2-selection--single {
+    border: 2px solid rgba(0, 0, 0, 0.36);
+    padding: 8px;
+    border-radius: 3px;
+    background-color: #fff;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    font-size: 15px;
+    line-height: 1.75;
+}

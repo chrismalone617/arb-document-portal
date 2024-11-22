@@ -6,7 +6,9 @@
  * Author: Your Name
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+    exit; // Exit if accessed directly
+}
 
 define( 'ARB_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ARB_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -22,8 +24,8 @@ require_once ARB_PLUGIN_DIR . 'includes/class-custom-field.php';
 // Enqueue scripts and styles
 function arb_enqueue_assets() {
     if ( is_admin() ) {
-        wp_enqueue_style( 'arb-select2', ARB_PLUGIN_URL . 'css/select2.min.css' );
-        wp_enqueue_style( 'arb-custom-styles', ARB_PLUGIN_URL . 'css/custom-styles.css' );
+        wp_enqueue_style( 'arb-select2', ARB_PLUGIN_URL . 'css/select2.min.css', [], null );
+        wp_enqueue_style( 'arb-custom-styles', ARB_PLUGIN_URL . 'css/custom-styles.css', [], null );
         wp_enqueue_script( 'arb-select2', ARB_PLUGIN_URL . 'js/select2.min.js', [ 'jquery' ], null, true );
         wp_enqueue_script( 'arb-custom-script', ARB_PLUGIN_URL . 'js/custom-script.js', [ 'jquery', 'arb-select2' ], null, true );
     }
@@ -31,13 +33,12 @@ function arb_enqueue_assets() {
 add_action( 'admin_enqueue_scripts', 'arb_enqueue_assets' );
 
 // Create and delete database table
-register_activation_hook(__FILE__, 'arb_create_custom_table');
-register_uninstall_hook(__FILE__, 'arb_delete_custom_table');
+register_activation_hook( __FILE__, 'arb_create_custom_table' );
+register_uninstall_hook( __FILE__, 'arb_delete_custom_table' );
 
 function arb_create_custom_table() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'arb_settings';
-
     $charset_collate = $wpdb->get_charset_collate();
 
     $sql = "CREATE TABLE $table_name (
@@ -49,21 +50,24 @@ function arb_create_custom_table() {
     ) $charset_collate;";
 
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-    dbDelta($sql);
+    dbDelta( $sql );
 
-    // Insert default placeholder if not exists
-    $wpdb->insert(
-        $table_name,
-        [
-            'setting_key' => 'placeholder',
-            'setting_value' => 'Select an option',
-        ],
-        [ '%s', '%s' ]
-    );
+    // Insert default placeholder if it doesn't exist
+    $exists = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $table_name WHERE setting_key = %s", 'placeholder' ) );
+    if ( ! $exists ) {
+        $wpdb->insert(
+            $table_name,
+            [
+                'setting_key' => 'placeholder',
+                'setting_value' => 'Select an option',
+            ],
+            [ '%s', '%s' ]
+        );
+    }
 }
 
 function arb_delete_custom_table() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'arb_settings';
-    $wpdb->query("DROP TABLE IF EXISTS $table_name");
+    $wpdb->query( "DROP TABLE IF EXISTS $table_name" );
 }

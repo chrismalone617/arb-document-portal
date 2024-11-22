@@ -16,9 +16,8 @@ require_once ARB_PLUGIN_DIR . 'includes/class-settings-page.php';
 require_once ARB_PLUGIN_DIR . 'includes/dynamic-dropdown.php';
 require_once ARB_PLUGIN_DIR . 'includes/class-custom-field.php';
 
-
 // Initialize the settings page
-add_action( 'admin_menu', [ 'ARB\SettingsPage', 'init' ] );
+\ARB\SettingsPage::init();
 
 // Enqueue scripts and styles
 function arb_enqueue_assets() {
@@ -52,11 +51,15 @@ function arb_create_custom_table() {
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
     dbDelta($sql);
 
-    // Insert default placeholder
-    $wpdb->insert($table_name, [
-        'setting_key' => 'placeholder',
-        'setting_value' => 'Select an option'
-    ]);
+    // Insert default placeholder if not exists
+    $wpdb->insert(
+        $table_name,
+        [
+            'setting_key' => 'placeholder',
+            'setting_value' => 'Select an option',
+        ],
+        [ '%s', '%s' ]
+    );
 }
 
 function arb_delete_custom_table() {
